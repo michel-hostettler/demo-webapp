@@ -19,39 +19,26 @@ body {
 
 header {
   text-align: center;
-  padding: 40px 20px;
-  background: white;
-  border-radius: 16px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  padding: 40px 0;
+  color: white;
 }
 
 header h1 {
   font-size: 2.5rem;
-  color: #667eea;
-  margin-bottom: 10px;
-}
-
-header p {
-  color: #666;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
 main {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
 .card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-}
-
-.card h2 {
-  color: #333;
-  margin-bottom: 16px;
-  font-size: 1.5rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
 }
 
 /* Counter */
@@ -59,69 +46,104 @@ main {
   text-align: center;
 }
 
-.counter .count {
+.counter h2 {
+  margin-bottom: 20px;
+}
+
+.counter-display {
   font-size: 4rem;
   font-weight: bold;
   color: #667eea;
   margin: 20px 0;
 }
 
-.counter .buttons {
+.counter-buttons {
   display: flex;
   gap: 10px;
   justify-content: center;
 }
 
-.counter button {
+.counter-buttons button {
   padding: 12px 24px;
   font-size: 1.2rem;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition: transform 0.1s, box-shadow 0.2s;
 }
 
-.counter button:hover {
+.counter-buttons button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.counter button.increment {
-  background: #667eea;
+.counter-buttons button:first-child {
+  background: #ef4444;
   color: white;
 }
 
-.counter button.decrement {
-  background: #f0f0f0;
-  color: #333;
-}
-
-.counter button.reset {
-  background: #ff6b6b;
+.counter-buttons button:last-child {
+  background: #22c55e;
   color: white;
 }
 
 /* Todo List */
-.todo-list .add-form {
-  display: flex;
-  gap: 10px;
+.todo-list h2 {
+  margin-bottom: 20px;
+}
+
+.backend-status {
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+}
+
+.backend-status.checking {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.backend-status.connected {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.backend-status.offline {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.error-message {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 6px;
   margin-bottom: 16px;
 }
 
-.todo-list input {
-  flex: 1;
-  padding: 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 1rem;
+.add-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.todo-list input:focus {
+.add-form input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.add-form input:focus {
   outline: none;
   border-color: #667eea;
 }
 
-.todo-list .add-btn {
+.add-btn {
   padding: 12px 24px;
   background: #667eea;
   color: white;
@@ -129,6 +151,11 @@ main {
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.add-btn:hover {
+  background: #5a67d8;
 }
 
 .todo-list ul {
@@ -140,16 +167,17 @@ main {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.2s;
 }
 
-.todo-list li:last-child {
-  border-bottom: none;
+.todo-list li:hover {
+  background: #f9fafb;
 }
 
 .todo-list li.completed span {
   text-decoration: line-through;
-  color: #999;
+  color: #9ca3af;
 }
 
 .todo-list li input[type="checkbox"] {
@@ -163,24 +191,29 @@ main {
 }
 
 .todo-list li button {
-  background: #ff6b6b;
+  background: #ef4444;
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
-.empty-state {
+.todo-list li:hover button {
+  opacity: 1;
+}
+
+.empty-state, .loading {
   text-align: center;
-  color: #999;
-  padding: 20px;
+  color: #9ca3af;
+  padding: 40px;
 }
 
 footer {
   text-align: center;
-  padding: 20px;
-  color: white;
-  opacity: 0.8;
-  margin-top: 20px;
+  padding: 40px 0;
+  color: rgba(255,255,255,0.8);
 }
