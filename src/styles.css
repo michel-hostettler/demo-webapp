@@ -50,20 +50,20 @@ main {
   margin-bottom: 20px;
 }
 
-.counter-display {
+.count {
   font-size: 4rem;
   font-weight: bold;
   color: #667eea;
   margin: 20px 0;
 }
 
-.counter-buttons {
+.buttons {
   display: flex;
   gap: 10px;
   justify-content: center;
 }
 
-.counter-buttons button {
+.buttons button {
   padding: 12px 24px;
   font-size: 1.2rem;
   border: none;
@@ -72,17 +72,22 @@ main {
   transition: transform 0.1s, box-shadow 0.2s;
 }
 
-.counter-buttons button:hover {
+.buttons button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.counter-buttons button:first-child {
+.buttons .decrement {
   background: #ef4444;
   color: white;
 }
 
-.counter-buttons button:last-child {
+.buttons .reset {
+  background: #6b7280;
+  color: white;
+}
+
+.buttons .increment {
   background: #22c55e;
   color: white;
 }
