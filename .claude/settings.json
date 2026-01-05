@@ -4,11 +4,28 @@
       "Read",
       "Edit",
       "Write",
-      "Bash(*)"
+      "Bash(npm test *)",
+      "Bash(npm run lint *)",
+      "Bash(npm run test:* *)",
+      "Bash(mvn test *)",
+      "Bash(./gradlew test *)",
+      "Bash(pytest *)",
+      "Bash(cargo test *)",
+      "Bash(go test *)",
+      "Bash(npm install *)"
     ],
     "deny": [
-      "Bash(rm -rf /)",
+      "Bash(rm -rf *)",
+      "Bash(git push *)",
+      "Bash(npm publish *)",
       "Bash(git push --force *)"
     ]
+  },
+  "restrictions": {
+    "minimalChanges": true,
+    "noNewFeatures": true,
+    "mustRunTests": true,
+    "canRunTests": true,
+    "canRunLint": true
   }
 }

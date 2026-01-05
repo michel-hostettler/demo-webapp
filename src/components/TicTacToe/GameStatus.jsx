@@ -1,5 +1,3 @@
-import React from 'react'
-
 export default function GameStatus({ currentPlayer, winner, scores, onReset, onResetScores }) {
   const getStatusMessage = () => {
     if (winner === 'draw') {

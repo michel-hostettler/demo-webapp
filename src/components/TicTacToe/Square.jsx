@@ -1,5 +1,3 @@
-import React from 'react'
-
 export default function Square({ value, onClick, isWinning, disabled }) {
   const getClassName = () => {
     let className = 'tictactoe-square'

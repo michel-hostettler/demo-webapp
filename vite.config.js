@@ -12,17 +12,12 @@ export default defineConfig({
     port: 3000
   },
   test: {
+    mode: 'development',
     environment: 'jsdom',
     globals: true,
     setupFiles: './vitest.setup.js',
-    alias: {
-      'react': 'react',
-      'react-dom': 'react-dom'
-    },
-    server: {
-      deps: {
-        inline: ['react', 'react-dom']
-      }
+    env: {
+      NODE_ENV: 'development'
     }
   },
   resolve: {
