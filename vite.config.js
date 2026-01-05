@@ -14,6 +14,18 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: './vitest.setup.js'
+    setupFiles: './vitest.setup.js',
+    alias: {
+      'react': 'react',
+      'react-dom': 'react-dom'
+    },
+    server: {
+      deps: {
+        inline: ['react', 'react-dom']
+      }
+    }
+  },
+  resolve: {
+    conditions: ['development', 'browser']
   }
 })

@@ -217,3 +217,207 @@ footer {
   padding: 40px 0;
   color: rgba(255,255,255,0.8);
 }
+
+/* Tic-Tac-Toe */
+.tictactoe {
+  text-align: center;
+}
+
+.tictactoe h2 {
+  margin-bottom: 20px;
+}
+
+.tictactoe-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 280px;
+  margin: 0 auto 24px;
+}
+
+.tictactoe-square {
+  aspect-ratio: 1;
+  font-size: 2.5rem;
+  font-weight: bold;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 80px;
+}
+
+.tictactoe-square:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.tictactoe-square.available:hover {
+  background: #ede9fe;
+  border-color: #667eea;
+}
+
+.tictactoe-square.x {
+  color: #ef4444;
+}
+
+.tictactoe-square.o {
+  color: #667eea;
+}
+
+.tictactoe-square.winning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #f59e0b;
+  animation: pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+
+.tictactoe-square:disabled {
+  cursor: not-allowed;
+}
+
+.tictactoe-status {
+  margin-top: 16px;
+}
+
+.status-message {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.status-message.winner {
+  color: #059669;
+}
+
+.tictactoe-scoreboard {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.tictactoe-scoreboard .score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  min-width: 60px;
+}
+
+.tictactoe-scoreboard .score.x {
+  background: #fef2f2;
+}
+
+.tictactoe-scoreboard .score.x .label {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.tictactoe-scoreboard .score.o {
+  background: #eef2ff;
+}
+
+.tictactoe-scoreboard .score.o .label {
+  color: #667eea;
+  font-weight: bold;
+}
+
+.tictactoe-scoreboard .score.draws {
+  background: #f3f4f6;
+}
+
+.tictactoe-scoreboard .score.draws .label {
+  color: #6b7280;
+  font-weight: bold;
+}
+
+.tictactoe-scoreboard .score .value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.tictactoe-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tictactoe-buttons .reset-btn {
+  padding: 10px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.tictactoe-buttons .reset-btn:hover {
+  background: #5a67d8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.tictactoe-buttons .reset-scores-btn {
+  padding: 10px 20px;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.tictactoe-buttons .reset-scores-btn:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Responsive Tic-Tac-Toe */
+@media (max-width: 640px) {
+  .tictactoe-board {
+    max-width: 240px;
+    gap: 6px;
+  }
+
+  .tictactoe-square {
+    min-height: 70px;
+    font-size: 2rem;
+  }
+
+  .tictactoe-scoreboard {
+    gap: 12px;
+  }
+
+  .tictactoe-scoreboard .score {
+    padding: 6px 12px;
+    min-width: 50px;
+  }
+
+  .tictactoe-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tictactoe-buttons .reset-btn,
+  .tictactoe-buttons .reset-scores-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+}
