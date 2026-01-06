@@ -2,7 +2,6 @@ import React from 'react'
 import Header from './components/Header'
 import Counter from './components/Counter'
 import TodoList from './components/TodoList'
-import TicTacToe from './components/TicTacToe'
 import Snake from './components/Snake'
 import Footer from './components/Footer'
 
@@ -19,7 +18,6 @@ export default function App() {
           justifyContent: 'center',
           marginBottom: '24px'
         }}>
-          <TicTacToe />
           <Snake />
         </section>
         <TodoList />
