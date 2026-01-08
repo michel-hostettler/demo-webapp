@@ -3,11 +3,13 @@ import { useGame2048 } from './useGame2048'
 import Grid from './Grid'
 import ScoreDisplay from './ScoreDisplay'
 import Controls from './Controls'
+import GameOverlay from './GameOverlay'
 
 export default function Game2048() {
   const {
-    grid,
+    tiles,
     score,
+    scoreChange,
     highScore,
     isGameOver,
     hasWonGame,
@@ -45,13 +47,19 @@ export default function Game2048() {
 
       <ScoreDisplay
         score={score}
+        scoreChange={scoreChange}
         highScore={highScore}
         isGameOver={isGameOver}
         hasWon={hasWonGame}
       />
 
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <Grid grid={grid} />
+      <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
+        <Grid tiles={tiles} />
+        <GameOverlay
+          isGameOver={isGameOver}
+          hasWon={hasWonGame}
+          onReset={resetGame}
+        />
       </div>
 
       <Controls onMove={handleMove} onReset={resetGame} />

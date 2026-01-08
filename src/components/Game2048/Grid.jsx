@@ -1,13 +1,20 @@
 import React from 'react'
 import Tile from './Tile'
 
-export default function Grid({ grid }) {
+const TILE_SIZE = 65
+const GAP_SIZE = 8
+const GRID_SIZE = 4
+
+// Calculate total grid size
+const gridDimension = GRID_SIZE * TILE_SIZE + (GRID_SIZE - 1) * GAP_SIZE
+
+export default function Grid({ tiles }) {
   return (
     <div
       style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 65px)',
-        gap: '8px',
+        position: 'relative',
+        width: `${gridDimension}px`,
+        height: `${gridDimension}px`,
         backgroundColor: '#0f172a',
         padding: '8px',
         borderRadius: '12px',
@@ -15,9 +22,44 @@ export default function Grid({ grid }) {
       }}
       data-testid="game-grid"
     >
-      {grid.flat().map((value, index) => (
-        <Tile key={index} value={value} />
-      ))}
+      {/* Background grid cells */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '8px',
+          left: '8px',
+          display: 'grid',
+          gridTemplateColumns: `repeat(${GRID_SIZE}, ${TILE_SIZE}px)`,
+          gap: `${GAP_SIZE}px`,
+        }}
+      >
+        {Array(GRID_SIZE * GRID_SIZE).fill(null).map((_, index) => (
+          <div
+            key={`bg-${index}`}
+            style={{
+              width: `${TILE_SIZE}px`,
+              height: `${TILE_SIZE}px`,
+              backgroundColor: '#1e293b',
+              borderRadius: '8px',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Animated tiles layer */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '8px',
+          left: '8px',
+          width: `${gridDimension}px`,
+          height: `${gridDimension}px`,
+        }}
+      >
+        {tiles.map(tile => (
+          <Tile key={tile.id} tile={tile} />
+        ))}
+      </div>
     </div>
   )
 }
