@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useLayoutEffect, useRef } from 'react'
 
 const TILE_SIZE = 65
 const GAP_SIZE = 8
-const ANIMATION_DURATION = 150
+const SLIDE_DURATION = 150
+const MERGE_DURATION = 200
 
 const getTileColor = (value) => {
   const colors = {
@@ -34,33 +35,61 @@ const getGlowColor = (value) => {
 export default function Tile({ tile }) {
   const { value, row, col, previousRow, previousCol, isNew, isMerged } = tile
   const { bg, text } = getTileColor(value)
-  const [animationState, setAnimationState] = useState(
-    isNew ? 'appearing' : previousRow !== null || previousCol !== null ? 'moving' : 'idle'
+
+  // Calculate target position
+  const targetX = col * (TILE_SIZE + GAP_SIZE)
+  const targetY = row * (TILE_SIZE + GAP_SIZE)
+
+  // Calculate start position (previous position for sliding, or target if no movement)
+  const startX = previousCol !== null ? previousCol * (TILE_SIZE + GAP_SIZE) : targetX
+  const startY = previousRow !== null ? previousRow * (TILE_SIZE + GAP_SIZE) : targetY
+
+  // Determine if tile needs to slide
+  const needsSlide = previousRow !== null || previousCol !== null
+
+  // Track current animated position
+  const [currentPos, setCurrentPos] = useState({ x: startX, y: startY })
+  const [isSliding, setIsSliding] = useState(false)
+  const [animationPhase, setAnimationPhase] = useState(
+    isNew ? 'appearing' : isMerged ? 'merging' : needsSlide ? 'sliding' : 'idle'
   )
 
-  // Calculate position
-  const x = col * (TILE_SIZE + GAP_SIZE)
-  const y = row * (TILE_SIZE + GAP_SIZE)
+  const hasAnimatedRef = useRef(false)
 
-  // Calculate previous position for slide animation
-  const prevX = previousCol !== null ? previousCol * (TILE_SIZE + GAP_SIZE) : x
-  const prevY = previousRow !== null ? previousRow * (TILE_SIZE + GAP_SIZE) : y
+  // Start at previous position, then animate to new position
+  useLayoutEffect(() => {
+    if (needsSlide && !hasAnimatedRef.current) {
+      // Start at previous position immediately
+      setCurrentPos({ x: startX, y: startY })
+      setIsSliding(false)
+      hasAnimatedRef.current = true
 
-  useEffect(() => {
-    if (isNew) {
-      setAnimationState('appearing')
-      const timer = setTimeout(() => setAnimationState('idle'), ANIMATION_DURATION)
-      return () => clearTimeout(timer)
-    } else if (isMerged) {
-      setAnimationState('merging')
-      const timer = setTimeout(() => setAnimationState('idle'), 200)
-      return () => clearTimeout(timer)
-    } else if (previousRow !== null || previousCol !== null) {
-      setAnimationState('moving')
-      const timer = setTimeout(() => setAnimationState('idle'), ANIMATION_DURATION)
-      return () => clearTimeout(timer)
+      // Trigger slide to new position after a frame
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsSliding(true)
+          setCurrentPos({ x: targetX, y: targetY })
+
+          // After slide completes, check for merge animation
+          setTimeout(() => {
+            setIsSliding(false)
+            if (isMerged) {
+              setAnimationPhase('merging')
+              setTimeout(() => setAnimationPhase('idle'), MERGE_DURATION)
+            } else {
+              setAnimationPhase('idle')
+            }
+          }, SLIDE_DURATION)
+        })
+      })
+    } else if (isNew) {
+      setCurrentPos({ x: targetX, y: targetY })
+      setAnimationPhase('appearing')
+      setTimeout(() => setAnimationPhase('idle'), SLIDE_DURATION)
+    } else if (!needsSlide) {
+      setCurrentPos({ x: targetX, y: targetY })
     }
-  }, [isNew, isMerged, previousRow, previousCol])
+  }, [needsSlide, startX, startY, targetX, targetY, isNew, isMerged])
 
   // Animation styles
   const getAnimationStyle = () => {
@@ -78,33 +107,24 @@ export default function Tile({ tile }) {
       color: text,
       boxShadow: value > 0 ? `0 2px 8px rgba(0,0,0,0.3)` : 'none',
       zIndex: isMerged ? 20 : 10,
+      transform: `translate(${currentPos.x}px, ${currentPos.y}px)`,
+      transition: isSliding ? `transform ${SLIDE_DURATION}ms ease-out` : 'none',
     }
 
-    switch (animationState) {
+    switch (animationPhase) {
       case 'appearing':
         return {
           ...baseStyle,
-          transform: `translate(${x}px, ${y}px)`,
-          animation: 'popIn 150ms ease-out forwards',
+          animation: `popIn ${SLIDE_DURATION}ms ease-out forwards`,
         }
       case 'merging':
         return {
           ...baseStyle,
-          transform: `translate(${x}px, ${y}px)`,
-          animation: 'merge 200ms ease-out forwards',
+          animation: `merge ${MERGE_DURATION}ms ease-out forwards`,
           boxShadow: `0 0 20px ${getGlowColor(value)}, 0 2px 8px rgba(0,0,0,0.3)`,
         }
-      case 'moving':
-        return {
-          ...baseStyle,
-          transform: `translate(${x}px, ${y}px)`,
-          transition: `transform ${ANIMATION_DURATION}ms ease-out`,
-        }
       default:
-        return {
-          ...baseStyle,
-          transform: `translate(${x}px, ${y}px)`,
-        }
+        return baseStyle
     }
   }
 
@@ -114,28 +134,28 @@ export default function Tile({ tile }) {
         {`
           @keyframes popIn {
             0% {
-              transform: translate(${x}px, ${y}px) scale(0);
+              transform: translate(${targetX}px, ${targetY}px) scale(0);
               opacity: 0;
             }
             50% {
-              transform: translate(${x}px, ${y}px) scale(1.1);
+              transform: translate(${targetX}px, ${targetY}px) scale(1.1);
               opacity: 1;
             }
             100% {
-              transform: translate(${x}px, ${y}px) scale(1);
+              transform: translate(${targetX}px, ${targetY}px) scale(1);
               opacity: 1;
             }
           }
 
           @keyframes merge {
             0% {
-              transform: translate(${x}px, ${y}px) scale(1);
+              transform: translate(${currentPos.x}px, ${currentPos.y}px) scale(1);
             }
             50% {
-              transform: translate(${x}px, ${y}px) scale(1.2);
+              transform: translate(${currentPos.x}px, ${currentPos.y}px) scale(1.2);
             }
             100% {
-              transform: translate(${x}px, ${y}px) scale(1);
+              transform: translate(${currentPos.x}px, ${currentPos.y}px) scale(1);
             }
           }
         `}

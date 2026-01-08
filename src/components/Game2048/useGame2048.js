@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 
 const GRID_SIZE = 4
+const SLIDE_DURATION = 150
 
 let tileIdCounter = 0
 const getNextTileId = () => ++tileIdCounter
@@ -186,6 +187,7 @@ export function useGame2048() {
   const [isGameOver, setIsGameOver] = useState(false)
   const [hasWonGame, setHasWonGame] = useState(false)
   const animationTimeoutRef = useRef(null)
+  const isAnimatingRef = useRef(false)
 
   useEffect(() => {
     if (score > highScore) {
@@ -204,7 +206,10 @@ export function useGame2048() {
   }, [])
 
   const handleMove = useCallback((direction) => {
-    if (isGameOver) return
+    if (isGameOver || isAnimatingRef.current) return
+
+    // Mark as animating to prevent rapid moves
+    isAnimatingRef.current = true
 
     setGrid(currentGrid => {
       // Clear previous animation flags first
@@ -212,10 +217,9 @@ export function useGame2048() {
       const { grid: newGrid, score: moveScore } = move(cleanGrid, direction)
 
       if (gridsEqual(cleanGrid, newGrid)) {
+        isAnimatingRef.current = false
         return currentGrid
       }
-
-      const gridWithNewTile = addRandomTile(newGrid)
 
       if (moveScore > 0) {
         setScoreChange(moveScore)
@@ -225,20 +229,36 @@ export function useGame2048() {
 
       setScore(s => s + moveScore)
 
-      if (hasWon(gridWithNewTile) && !hasWonGame) {
-        setHasWonGame(true)
-      }
+      // Phase 1: Show movement animation (tiles slide)
+      // Phase 2: After slide completes, add new tile
+      setTimeout(() => {
+        setGrid(gridAfterSlide => {
+          const gridWithNewTile = addRandomTile(gridAfterSlide)
 
-      if (!canMove(gridWithNewTile)) {
-        setIsGameOver(true)
-      }
+          if (hasWon(gridWithNewTile) && !hasWonGame) {
+            setHasWonGame(true)
+          }
 
-      return gridWithNewTile
+          if (!canMove(gridWithNewTile)) {
+            setIsGameOver(true)
+          }
+
+          // Allow next move after new tile appears
+          setTimeout(() => {
+            isAnimatingRef.current = false
+          }, 50)
+
+          return gridWithNewTile
+        })
+      }, SLIDE_DURATION)
+
+      return newGrid
     })
   }, [isGameOver, hasWonGame])
 
   const resetGame = useCallback(() => {
     tileIdCounter = 0 // Reset counter
+    isAnimatingRef.current = false
     let g = createEmptyGrid()
     g = addRandomTile(g)
     g = addRandomTile(g)
