@@ -12,8 +12,6 @@ const createTile = (value, row, col) => ({
   value,
   row,
   col,
-  previousRow: null,
-  previousCol: null,
   isNew: true,
   isMerged: false,
 })
@@ -45,42 +43,39 @@ const addRandomTile = (grid) => {
   return newGrid
 }
 
-// Slide row to the left and track tile movements
-const slideRowWithTracking = (row, rowIndex) => {
+// Slide row to the left and merge
+const slideRowLeft = (row) => {
+  // Filter out empty cells
   const tiles = row.filter(tile => tile !== null)
   const result = []
   let score = 0
 
-  for (let i = 0; i < tiles.length; i++) {
+  let i = 0
+  while (i < tiles.length) {
     if (i < tiles.length - 1 && tiles[i].value === tiles[i + 1].value) {
-      // Merge tiles
+      // Merge two tiles
       const mergedValue = tiles[i].value * 2
       const mergedTile = {
         id: getNextTileId(),
         value: mergedValue,
-        row: rowIndex,
+        row: 0, // Will be updated later
         col: result.length,
-        previousRow: tiles[i].row,
-        previousCol: tiles[i].col,
         isNew: false,
         isMerged: true,
-        mergedFrom: [tiles[i].id, tiles[i + 1].id],
       }
       result.push(mergedTile)
       score += mergedValue
-      i++ // Skip next tile (it was merged)
+      i += 2 // Skip both merged tiles
     } else {
-      // Move tile
+      // Move tile without merge
       const movedTile = {
         ...tiles[i],
-        previousRow: tiles[i].row,
-        previousCol: tiles[i].col,
-        row: rowIndex,
         col: result.length,
         isNew: false,
         isMerged: false,
       }
       result.push(movedTile)
+      i++
     }
   }
 
@@ -92,43 +87,82 @@ const slideRowWithTracking = (row, rowIndex) => {
   return { row: result, score }
 }
 
-const rotateGrid = (grid, times = 1) => {
-  let result = grid
-  for (let t = 0; t < times; t++) {
-    result = result[0].map((_, colIndex) =>
-      result.map(row => row[colIndex]).reverse()
-    )
-  }
-  return result
+// Rotate grid 90 degrees clockwise
+const rotateGridCW = (grid) => {
+  return grid[0].map((_, colIndex) =>
+    grid.map(row => row[colIndex]).reverse()
+  )
 }
 
-// Update tile positions after rotation
-const updateTilePositions = (grid) => {
-  return grid.map((row, rowIndex) =>
+// Rotate grid 90 degrees counter-clockwise
+const rotateGridCCW = (grid) => {
+  return grid[0].map((_, colIndex) =>
+    grid.map(row => row[GRID_SIZE - 1 - colIndex])
+  )
+}
+
+// Move all tiles left
+const moveLeft = (grid) => {
+  let totalScore = 0
+  const newGrid = grid.map((row, rowIndex) => {
+    const { row: newRow, score } = slideRowLeft(row)
+    totalScore += score
+    // Update row index for all tiles
+    return newRow.map(tile => {
+      if (tile === null) return null
+      return { ...tile, row: rowIndex }
+    })
+  })
+  return { grid: newGrid, score: totalScore }
+}
+
+// Move in any direction by rotating, moving left, then rotating back
+const move = (grid, direction) => {
+  let workingGrid = grid
+
+  // Rotate to make all moves work as "left"
+  switch (direction) {
+    case 'up':
+      workingGrid = rotateGridCCW(workingGrid)
+      break
+    case 'right':
+      workingGrid = rotateGridCW(rotateGridCW(workingGrid))
+      break
+    case 'down':
+      workingGrid = rotateGridCW(workingGrid)
+      break
+    default: // left
+      break
+  }
+
+  // Perform move left
+  const { grid: movedGrid, score } = moveLeft(workingGrid)
+
+  // Rotate back
+  let resultGrid = movedGrid
+  switch (direction) {
+    case 'up':
+      resultGrid = rotateGridCW(movedGrid)
+      break
+    case 'right':
+      resultGrid = rotateGridCW(rotateGridCW(movedGrid))
+      break
+    case 'down':
+      resultGrid = rotateGridCCW(movedGrid)
+      break
+    default: // left
+      break
+  }
+
+  // Update all tile positions to match their actual grid positions
+  resultGrid = resultGrid.map((row, rowIndex) =>
     row.map((tile, colIndex) => {
       if (tile === null) return null
       return { ...tile, row: rowIndex, col: colIndex }
     })
   )
-}
 
-const moveLeft = (grid) => {
-  let totalScore = 0
-  const newGrid = grid.map((row, rowIndex) => {
-    const { row: newRow, score } = slideRowWithTracking(row, rowIndex)
-    totalScore += score
-    return newRow
-  })
-  return { grid: newGrid, score: totalScore }
-}
-
-const move = (grid, direction) => {
-  const rotations = { left: 0, up: 1, right: 2, down: 3 }
-  let rotated = rotateGrid(grid, rotations[direction])
-  let { grid: moved, score } = moveLeft(rotated)
-  let result = rotateGrid(moved, (4 - rotations[direction]) % 4)
-  result = updateTilePositions(result)
-  return { grid: result, score }
+  return { grid: resultGrid, score }
 }
 
 const gridsEqual = (a, b) => {
@@ -163,8 +197,6 @@ const clearAnimationFlags = (grid) => {
         ...tile,
         isNew: false,
         isMerged: false,
-        previousRow: null,
-        previousCol: null,
       }
     })
   )
@@ -186,7 +218,6 @@ export function useGame2048() {
   })
   const [isGameOver, setIsGameOver] = useState(false)
   const [hasWonGame, setHasWonGame] = useState(false)
-  const animationTimeoutRef = useRef(null)
   const isAnimatingRef = useRef(false)
 
   useEffect(() => {
@@ -195,15 +226,6 @@ export function useGame2048() {
       localStorage.setItem('game2048HighScore', score.toString())
     }
   }, [score, highScore])
-
-  // Clear animation flags after animation completes
-  useEffect(() => {
-    return () => {
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current)
-      }
-    }
-  }, [])
 
   const handleMove = useCallback((direction) => {
     if (isGameOver || isAnimatingRef.current) return
@@ -229,8 +251,7 @@ export function useGame2048() {
 
       setScore(s => s + moveScore)
 
-      // Phase 1: Show movement animation (tiles slide)
-      // Phase 2: After slide completes, add new tile
+      // After slide animation completes, add new tile
       setTimeout(() => {
         setGrid(gridAfterSlide => {
           const gridWithNewTile = addRandomTile(gridAfterSlide)

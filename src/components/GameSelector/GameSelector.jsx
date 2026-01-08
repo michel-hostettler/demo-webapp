@@ -15,6 +15,13 @@ const games = [
     description: 'Zahlen-Puzzle Klassiker',
     color: '#eab308',
   },
+  {
+    id: 'memory',
+    name: 'Memory',
+    emoji: '🃏',
+    description: 'Finde alle Paare',
+    color: '#3b82f6',
+  },
 ]
 
 export default function GameSelector({ selectedGame, onSelectGame }) {

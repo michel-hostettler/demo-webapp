@@ -4,6 +4,7 @@ import Counter from './components/Counter'
 import TodoList from './components/TodoList'
 import Snake from './components/Snake'
 import Game2048 from './components/Game2048'
+import { Memory } from './components/Memory'
 import GameSelector from './components/GameSelector'
 import Footer from './components/Footer'
 
@@ -16,6 +17,8 @@ export default function App() {
         return <Snake />
       case '2048':
         return <Game2048 />
+      case 'memory':
+        return <Memory onBack={() => setSelectedGame('snake')} />
       default:
         return <Snake />
     }

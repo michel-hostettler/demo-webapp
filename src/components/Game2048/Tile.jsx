@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useLayoutEffect, useRef } from 'react'
+import React from 'react'
 
 const TILE_SIZE = 65
 const GAP_SIZE = 8
 const SLIDE_DURATION = 150
-const MERGE_DURATION = 200
 
 const getTileColor = (value) => {
   const colors = {
@@ -33,139 +32,50 @@ const getGlowColor = (value) => {
 }
 
 export default function Tile({ tile }) {
-  const { value, row, col, previousRow, previousCol, isNew, isMerged } = tile
+  const { value, row, col, isNew, isMerged } = tile
   const { bg, text } = getTileColor(value)
 
-  // Calculate target position
-  const targetX = col * (TILE_SIZE + GAP_SIZE)
-  const targetY = row * (TILE_SIZE + GAP_SIZE)
+  // Calculate position based on current row/col
+  const x = col * (TILE_SIZE + GAP_SIZE)
+  const y = row * (TILE_SIZE + GAP_SIZE)
 
-  // Calculate start position (previous position for sliding, or target if no movement)
-  const startX = previousCol !== null ? previousCol * (TILE_SIZE + GAP_SIZE) : targetX
-  const startY = previousRow !== null ? previousRow * (TILE_SIZE + GAP_SIZE) : targetY
+  // Determine animation class
+  let animationClass = ''
+  if (isNew) {
+    animationClass = 'tile-new'
+  } else if (isMerged) {
+    animationClass = 'tile-merged'
+  }
 
-  // Determine if tile needs to slide
-  const needsSlide = previousRow !== null || previousCol !== null
-
-  // Track current animated position
-  const [currentPos, setCurrentPos] = useState({ x: startX, y: startY })
-  const [isSliding, setIsSliding] = useState(false)
-  const [animationPhase, setAnimationPhase] = useState(
-    isNew ? 'appearing' : isMerged ? 'merging' : needsSlide ? 'sliding' : 'idle'
-  )
-
-  const hasAnimatedRef = useRef(false)
-
-  // Start at previous position, then animate to new position
-  useLayoutEffect(() => {
-    if (needsSlide && !hasAnimatedRef.current) {
-      // Start at previous position immediately
-      setCurrentPos({ x: startX, y: startY })
-      setIsSliding(false)
-      hasAnimatedRef.current = true
-
-      // Trigger slide to new position after a frame
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setIsSliding(true)
-          setCurrentPos({ x: targetX, y: targetY })
-
-          // After slide completes, check for merge animation
-          setTimeout(() => {
-            setIsSliding(false)
-            if (isMerged) {
-              setAnimationPhase('merging')
-              setTimeout(() => setAnimationPhase('idle'), MERGE_DURATION)
-            } else {
-              setAnimationPhase('idle')
-            }
-          }, SLIDE_DURATION)
-        })
-      })
-    } else if (isNew) {
-      setCurrentPos({ x: targetX, y: targetY })
-      setAnimationPhase('appearing')
-      setTimeout(() => setAnimationPhase('idle'), SLIDE_DURATION)
-    } else if (!needsSlide) {
-      setCurrentPos({ x: targetX, y: targetY })
-    }
-  }, [needsSlide, startX, startY, targetX, targetY, isNew, isMerged])
-
-  // Animation styles
-  const getAnimationStyle = () => {
-    const baseStyle = {
-      position: 'absolute',
-      width: `${TILE_SIZE}px`,
-      height: `${TILE_SIZE}px`,
-      backgroundColor: bg,
-      borderRadius: '8px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: value >= 1000 ? '18px' : value >= 100 ? '22px' : '28px',
-      fontWeight: 'bold',
-      color: text,
-      boxShadow: value > 0 ? `0 2px 8px rgba(0,0,0,0.3)` : 'none',
-      zIndex: isMerged ? 20 : 10,
-      transform: `translate(${currentPos.x}px, ${currentPos.y}px)`,
-      transition: isSliding ? `transform ${SLIDE_DURATION}ms ease-out` : 'none',
-    }
-
-    switch (animationPhase) {
-      case 'appearing':
-        return {
-          ...baseStyle,
-          animation: `popIn ${SLIDE_DURATION}ms ease-out forwards`,
-        }
-      case 'merging':
-        return {
-          ...baseStyle,
-          animation: `merge ${MERGE_DURATION}ms ease-out forwards`,
-          boxShadow: `0 0 20px ${getGlowColor(value)}, 0 2px 8px rgba(0,0,0,0.3)`,
-        }
-      default:
-        return baseStyle
-    }
+  const style = {
+    position: 'absolute',
+    width: `${TILE_SIZE}px`,
+    height: `${TILE_SIZE}px`,
+    backgroundColor: bg,
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: value >= 1000 ? '18px' : value >= 100 ? '22px' : '28px',
+    fontWeight: 'bold',
+    color: text,
+    boxShadow: isMerged
+      ? `0 0 20px ${getGlowColor(value)}, 0 2px 8px rgba(0,0,0,0.3)`
+      : value > 0
+        ? '0 2px 8px rgba(0,0,0,0.3)'
+        : 'none',
+    zIndex: isMerged ? 20 : 10,
+    transform: `translate(${x}px, ${y}px)`,
+    transition: `transform ${SLIDE_DURATION}ms ease-out`,
   }
 
   return (
-    <>
-      <style>
-        {`
-          @keyframes popIn {
-            0% {
-              transform: translate(${targetX}px, ${targetY}px) scale(0);
-              opacity: 0;
-            }
-            50% {
-              transform: translate(${targetX}px, ${targetY}px) scale(1.1);
-              opacity: 1;
-            }
-            100% {
-              transform: translate(${targetX}px, ${targetY}px) scale(1);
-              opacity: 1;
-            }
-          }
-
-          @keyframes merge {
-            0% {
-              transform: translate(${currentPos.x}px, ${currentPos.y}px) scale(1);
-            }
-            50% {
-              transform: translate(${currentPos.x}px, ${currentPos.y}px) scale(1.2);
-            }
-            100% {
-              transform: translate(${currentPos.x}px, ${currentPos.y}px) scale(1);
-            }
-          }
-        `}
-      </style>
-      <div
-        style={getAnimationStyle()}
-        data-testid={`tile-${value}`}
-      >
-        {value > 0 ? value : ''}
-      </div>
-    </>
+    <div
+      style={style}
+      className={animationClass}
+      data-testid={`tile-${value}`}
+    >
+      {value > 0 ? value : ''}
+    </div>
   )
 }
