@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 const TILE_SIZE = 65
 const GAP_SIZE = 8
@@ -32,12 +32,27 @@ const getGlowColor = (value) => {
 }
 
 export default function Tile({ tile }) {
-  const { value, row, col, isNew, isMerged } = tile
+  const { value, row, col, previousRow, previousCol, isNew, isMerged } = tile
   const { bg, text } = getTileColor(value)
 
-  // Calculate position based on current row/col
-  const x = col * (TILE_SIZE + GAP_SIZE)
-  const y = row * (TILE_SIZE + GAP_SIZE)
+  // Use previous position for initial render, then animate to current position
+  const [animatedPos, setAnimatedPos] = useState({
+    x: (previousCol ?? col) * (TILE_SIZE + GAP_SIZE),
+    y: (previousRow ?? row) * (TILE_SIZE + GAP_SIZE),
+  })
+
+  useEffect(() => {
+    // If position changed, animate to new position
+    const targetX = col * (TILE_SIZE + GAP_SIZE)
+    const targetY = row * (TILE_SIZE + GAP_SIZE)
+
+    if (animatedPos.x !== targetX || animatedPos.y !== targetY) {
+      // Use requestAnimationFrame to ensure the transition happens
+      requestAnimationFrame(() => {
+        setAnimatedPos({ x: targetX, y: targetY })
+      })
+    }
+  }, [row, col, animatedPos.x, animatedPos.y])
 
   // Determine animation class
   let animationClass = ''
@@ -65,7 +80,7 @@ export default function Tile({ tile }) {
         ? '0 2px 8px rgba(0,0,0,0.3)'
         : 'none',
     zIndex: isMerged ? 20 : 10,
-    transform: `translate(${x}px, ${y}px)`,
+    transform: `translate(${animatedPos.x}px, ${animatedPos.y}px)`,
     transition: `transform ${SLIDE_DURATION}ms ease-out`,
   }
 

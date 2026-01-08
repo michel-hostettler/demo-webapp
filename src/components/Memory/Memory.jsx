@@ -55,8 +55,13 @@ export default function Memory({ onBack }) {
 
       {/* Game Grid */}
       <div
-        className="grid grid-cols-4 gap-2 p-3 bg-slate-900/50 rounded-xl border border-slate-700/50"
-        style={{ touchAction: 'manipulation' }}
+        className="p-3 bg-slate-900/50 rounded-xl border border-slate-700/50"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 65px)',
+          gap: '8px',
+          touchAction: 'manipulation',
+        }}
       >
         {cards.map((card, index) => (
           <Card
