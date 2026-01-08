@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react'
 
-const TILE_SIZE = 65
-const GAP_SIZE = 8
 const SLIDE_DURATION = 150
 
 const getTileColor = (value) => {
@@ -35,26 +33,20 @@ export default function Tile({ tile }) {
   const { value, row, col, previousRow, previousCol, isNew, isMerged } = tile
   const { bg, text } = getTileColor(value)
 
-  // Use previous position for initial render, then animate to current position
+  // Track position as percentage of grid (0-3 -> multiply by calc values)
   const [animatedPos, setAnimatedPos] = useState({
-    x: (previousCol ?? col) * (TILE_SIZE + GAP_SIZE),
-    y: (previousRow ?? row) * (TILE_SIZE + GAP_SIZE),
+    row: previousRow ?? row,
+    col: previousCol ?? col,
   })
 
   useEffect(() => {
-    // If position changed, animate to new position
-    const targetX = col * (TILE_SIZE + GAP_SIZE)
-    const targetY = row * (TILE_SIZE + GAP_SIZE)
-
-    if (animatedPos.x !== targetX || animatedPos.y !== targetY) {
-      // Use requestAnimationFrame to ensure the transition happens
+    if (animatedPos.row !== row || animatedPos.col !== col) {
       requestAnimationFrame(() => {
-        setAnimatedPos({ x: targetX, y: targetY })
+        setAnimatedPos({ row, col })
       })
     }
-  }, [row, col, animatedPos.x, animatedPos.y])
+  }, [row, col, animatedPos.row, animatedPos.col])
 
-  // Determine animation class
   let animationClass = ''
   if (isNew) {
     animationClass = 'tile-new'
@@ -62,32 +54,33 @@ export default function Tile({ tile }) {
     animationClass = 'tile-merged'
   }
 
-  const style = {
-    position: 'absolute',
-    width: `${TILE_SIZE}px`,
-    height: `${TILE_SIZE}px`,
-    backgroundColor: bg,
-    borderRadius: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: value >= 1000 ? '18px' : value >= 100 ? '22px' : '28px',
-    fontWeight: 'bold',
-    color: text,
-    boxShadow: isMerged
-      ? `0 0 20px ${getGlowColor(value)}, 0 2px 8px rgba(0,0,0,0.3)`
-      : value > 0
-        ? '0 2px 8px rgba(0,0,0,0.3)'
-        : 'none',
-    zIndex: isMerged ? 20 : 10,
-    transform: `translate(${animatedPos.x}px, ${animatedPos.y}px)`,
-    transition: `transform ${SLIDE_DURATION}ms ease-out`,
+  const getFontSize = () => {
+    if (value >= 1000) return 'clamp(14px, 4vw, 20px)'
+    if (value >= 100) return 'clamp(18px, 5vw, 24px)'
+    return 'clamp(22px, 6vw, 30px)'
   }
 
   return (
     <div
-      style={style}
-      className={animationClass}
+      className={`absolute flex items-center justify-center font-bold rounded-lg ${animationClass}`}
+      style={{
+        width: 'var(--tile-size)',
+        height: 'var(--tile-size)',
+        backgroundColor: bg,
+        color: text,
+        fontSize: getFontSize(),
+        boxShadow: isMerged
+          ? `0 0 20px ${getGlowColor(value)}, 0 2px 8px rgba(0,0,0,0.3)`
+          : value > 0
+            ? '0 2px 8px rgba(0,0,0,0.3)'
+            : 'none',
+        zIndex: isMerged ? 20 : 10,
+        transform: `translate(
+          calc(${animatedPos.col} * (var(--tile-size) + var(--gap-size))),
+          calc(${animatedPos.row} * (var(--tile-size) + var(--gap-size)))
+        )`,
+        transition: `transform ${SLIDE_DURATION}ms ease-out`,
+      }}
       data-testid={`tile-${value}`}
     >
       {value > 0 ? value : ''}

@@ -45,233 +45,226 @@ const addRandomTile = (grid) => {
   return newGrid
 }
 
-// Slide row to the left and merge - returns tiles with correct column positions
-const slideRowLeft = (row, rowIndex) => {
-  // Filter out empty cells and prepare tiles with their previous positions
-  const tiles = row.filter(tile => tile !== null).map(tile => ({
-    ...tile,
-    previousRow: tile.row,
-    previousCol: tile.col,
-  }))
-
-  const result = []
-  let score = 0
-  let i = 0
-
-  while (i < tiles.length) {
-    if (i < tiles.length - 1 && tiles[i].value === tiles[i + 1].value) {
-      // Merge two tiles - keep the first tile's ID for continuity
-      const mergedValue = tiles[i].value * 2
-      const mergedTile = {
-        id: tiles[i].id, // Keep original ID for animation continuity
-        value: mergedValue,
-        row: rowIndex,
-        col: result.length,
-        previousRow: tiles[i].previousRow,
-        previousCol: tiles[i].previousCol,
-        isNew: false,
-        isMerged: true,
-        mergedFromId: tiles[i + 1].id, // Track which tile was absorbed
-      }
-      result.push(mergedTile)
-      score += mergedValue
-      i += 2 // Skip both merged tiles
-    } else {
-      // Move tile without merge
-      const movedTile = {
-        ...tiles[i],
-        row: rowIndex,
-        col: result.length,
-        isNew: false,
-        isMerged: false,
-      }
-      result.push(movedTile)
-      i++
-    }
-  }
-
-  // Fill remaining with null
-  while (result.length < GRID_SIZE) {
-    result.push(null)
-  }
-
-  return { row: result, score }
-}
-
-// Move all tiles left - this is the core movement function
+// Direct implementation for LEFT movement
 const moveLeft = (grid) => {
+  const newGrid = createEmptyGrid()
   let totalScore = 0
-  const newGrid = grid.map((row, rowIndex) => {
-    const { row: newRow, score } = slideRowLeft(row, rowIndex)
-    totalScore += score
-    return newRow
-  })
-  return { grid: newGrid, score: totalScore }
-}
 
-// Transform grid for different directions
-// For UP: rotate CCW, move left, rotate CW
-// For DOWN: rotate CW, move left, rotate CCW
-// For RIGHT: rotate 180, move left, rotate 180
-
-const moveUp = (grid) => {
-  // For UP movement: we transpose so columns become rows, then move left, then transpose back
-  // This way, column 0 becomes row 0, etc.
-  const transposed = []
-  for (let col = 0; col < GRID_SIZE; col++) {
-    const newRow = []
-    for (let row = 0; row < GRID_SIZE; row++) {
-      const tile = grid[row][col]
-      if (tile) {
-        newRow.push({
-          ...tile,
-          // Store original position before transformation
-          previousRow: tile.row,
-          previousCol: tile.col,
+  for (let row = 0; row < GRID_SIZE; row++) {
+    const tiles = []
+    for (let col = 0; col < GRID_SIZE; col++) {
+      if (grid[row][col] !== null) {
+        tiles.push({
+          ...grid[row][col],
+          previousRow: row,
+          previousCol: col,
         })
-      } else {
-        newRow.push(null)
       }
     }
-    transposed.push(newRow)
-  }
 
-  // Move left on transposed grid
-  let totalScore = 0
-  const movedTransposed = transposed.map((row, colIndex) => {
-    const { row: newRow, score } = slideRowLeft(row, colIndex)
-    totalScore += score
-    return newRow
-  })
-
-  // Transpose back and fix positions
-  const result = createEmptyGrid()
-  for (let col = 0; col < GRID_SIZE; col++) {
-    for (let row = 0; row < GRID_SIZE; row++) {
-      const tile = movedTransposed[col][row]
-      if (tile) {
-        result[row][col] = {
-          ...tile,
+    let targetCol = 0
+    let i = 0
+    while (i < tiles.length) {
+      const currentTile = tiles[i]
+      if (i + 1 < tiles.length && currentTile.value === tiles[i + 1].value) {
+        const mergedValue = currentTile.value * 2
+        newGrid[row][targetCol] = {
+          id: currentTile.id,
+          value: mergedValue,
           row: row,
-          col: col,
-          // previousRow and previousCol are already set correctly from the original tile
+          col: targetCol,
+          previousRow: currentTile.previousRow,
+          previousCol: currentTile.previousCol,
+          isNew: false,
+          isMerged: true,
         }
-      }
-    }
-  }
-
-  return { grid: result, score: totalScore }
-}
-
-const moveDown = (grid) => {
-  // For DOWN: reverse each column, move as up (transpose), then reverse back
-  const transposed = []
-  for (let col = 0; col < GRID_SIZE; col++) {
-    const newRow = []
-    for (let row = GRID_SIZE - 1; row >= 0; row--) {
-      const tile = grid[row][col]
-      if (tile) {
-        newRow.push({
-          ...tile,
-          previousRow: tile.row,
-          previousCol: tile.col,
-        })
+        totalScore += mergedValue
+        i += 2
       } else {
-        newRow.push(null)
-      }
-    }
-    transposed.push(newRow)
-  }
-
-  // Move left on transposed grid
-  let totalScore = 0
-  const movedTransposed = transposed.map((row, colIndex) => {
-    const { row: newRow, score } = slideRowLeft(row, colIndex)
-    totalScore += score
-    return newRow
-  })
-
-  // Transpose back and reverse - fix positions
-  const result = createEmptyGrid()
-  for (let col = 0; col < GRID_SIZE; col++) {
-    for (let i = 0; i < GRID_SIZE; i++) {
-      const tile = movedTransposed[col][i]
-      const actualRow = GRID_SIZE - 1 - i
-      if (tile) {
-        result[actualRow][col] = {
-          ...tile,
-          row: actualRow,
-          col: col,
+        newGrid[row][targetCol] = {
+          ...currentTile,
+          row: row,
+          col: targetCol,
+          isNew: false,
+          isMerged: false,
         }
+        i++
       }
+      targetCol++
     }
   }
-
-  return { grid: result, score: totalScore }
-}
-
-const moveRight = (grid) => {
-  // For RIGHT: reverse each row, move left, then reverse back
-  let totalScore = 0
-  const newGrid = grid.map((row, rowIndex) => {
-    // Reverse the row, preserving tile info
-    const reversedRow = [...row].reverse().map(tile => {
-      if (tile) {
-        return {
-          ...tile,
-          previousRow: tile.row,
-          previousCol: tile.col,
-        }
-      }
-      return null
-    })
-
-    const { row: movedRow, score } = slideRowLeft(reversedRow, rowIndex)
-    totalScore += score
-
-    // Reverse back and fix column positions
-    const finalRow = [...movedRow].reverse()
-    return finalRow.map((tile, colIndex) => {
-      if (tile) {
-        return {
-          ...tile,
-          row: rowIndex,
-          col: colIndex,
-        }
-      }
-      return null
-    })
-  })
 
   return { grid: newGrid, score: totalScore }
 }
 
-// Main move function that delegates to direction-specific handlers
-const move = (grid, direction) => {
-  // First, save current positions as previous positions for all tiles
-  const preparedGrid = grid.map(row =>
-    row.map(tile => {
-      if (tile === null) return null
-      return {
-        ...tile,
-        previousRow: tile.row,
-        previousCol: tile.col,
-        isNew: false,
-        isMerged: false,
-      }
-    })
-  )
+// Direct implementation for RIGHT movement
+const moveRight = (grid) => {
+  const newGrid = createEmptyGrid()
+  let totalScore = 0
 
+  for (let row = 0; row < GRID_SIZE; row++) {
+    const tiles = []
+    for (let col = GRID_SIZE - 1; col >= 0; col--) {
+      if (grid[row][col] !== null) {
+        tiles.push({
+          ...grid[row][col],
+          previousRow: row,
+          previousCol: col,
+        })
+      }
+    }
+
+    let targetCol = GRID_SIZE - 1
+    let i = 0
+    while (i < tiles.length) {
+      const currentTile = tiles[i]
+      if (i + 1 < tiles.length && currentTile.value === tiles[i + 1].value) {
+        const mergedValue = currentTile.value * 2
+        newGrid[row][targetCol] = {
+          id: currentTile.id,
+          value: mergedValue,
+          row: row,
+          col: targetCol,
+          previousRow: currentTile.previousRow,
+          previousCol: currentTile.previousCol,
+          isNew: false,
+          isMerged: true,
+        }
+        totalScore += mergedValue
+        i += 2
+      } else {
+        newGrid[row][targetCol] = {
+          ...currentTile,
+          row: row,
+          col: targetCol,
+          isNew: false,
+          isMerged: false,
+        }
+        i++
+      }
+      targetCol--
+    }
+  }
+
+  return { grid: newGrid, score: totalScore }
+}
+
+// Direct implementation for UP movement
+const moveUp = (grid) => {
+  const newGrid = createEmptyGrid()
+  let totalScore = 0
+
+  for (let col = 0; col < GRID_SIZE; col++) {
+    const tiles = []
+    for (let row = 0; row < GRID_SIZE; row++) {
+      if (grid[row][col] !== null) {
+        tiles.push({
+          ...grid[row][col],
+          previousRow: row,
+          previousCol: col,
+        })
+      }
+    }
+
+    let targetRow = 0
+    let i = 0
+    while (i < tiles.length) {
+      const currentTile = tiles[i]
+      if (i + 1 < tiles.length && currentTile.value === tiles[i + 1].value) {
+        const mergedValue = currentTile.value * 2
+        newGrid[targetRow][col] = {
+          id: currentTile.id,
+          value: mergedValue,
+          row: targetRow,
+          col: col,
+          previousRow: currentTile.previousRow,
+          previousCol: currentTile.previousCol,
+          isNew: false,
+          isMerged: true,
+        }
+        totalScore += mergedValue
+        i += 2
+      } else {
+        newGrid[targetRow][col] = {
+          ...currentTile,
+          row: targetRow,
+          col: col,
+          isNew: false,
+          isMerged: false,
+        }
+        i++
+      }
+      targetRow++
+    }
+  }
+
+  return { grid: newGrid, score: totalScore }
+}
+
+// Direct implementation for DOWN movement
+const moveDown = (grid) => {
+  const newGrid = createEmptyGrid()
+  let totalScore = 0
+
+  for (let col = 0; col < GRID_SIZE; col++) {
+    const tiles = []
+    for (let row = GRID_SIZE - 1; row >= 0; row--) {
+      if (grid[row][col] !== null) {
+        tiles.push({
+          ...grid[row][col],
+          previousRow: row,
+          previousCol: col,
+        })
+      }
+    }
+
+    let targetRow = GRID_SIZE - 1
+    let i = 0
+    while (i < tiles.length) {
+      const currentTile = tiles[i]
+      if (i + 1 < tiles.length && currentTile.value === tiles[i + 1].value) {
+        const mergedValue = currentTile.value * 2
+        newGrid[targetRow][col] = {
+          id: currentTile.id,
+          value: mergedValue,
+          row: targetRow,
+          col: col,
+          previousRow: currentTile.previousRow,
+          previousCol: currentTile.previousCol,
+          isNew: false,
+          isMerged: true,
+        }
+        totalScore += mergedValue
+        i += 2
+      } else {
+        newGrid[targetRow][col] = {
+          ...currentTile,
+          row: targetRow,
+          col: col,
+          isNew: false,
+          isMerged: false,
+        }
+        i++
+      }
+      targetRow--
+    }
+  }
+
+  return { grid: newGrid, score: totalScore }
+}
+
+// Main move function
+const move = (grid, direction) => {
   switch (direction) {
     case 'up':
-      return moveUp(preparedGrid)
+      return moveUp(grid)
     case 'down':
-      return moveDown(preparedGrid)
+      return moveDown(grid)
     case 'right':
-      return moveRight(preparedGrid)
+      return moveRight(grid)
     case 'left':
     default:
-      return moveLeft(preparedGrid)
+      return moveLeft(grid)
   }
 }
 

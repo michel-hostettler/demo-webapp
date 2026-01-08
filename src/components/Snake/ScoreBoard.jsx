@@ -2,76 +2,23 @@ import React from 'react'
 
 export default function ScoreBoard({ score, highScore, isGameOver }) {
   return (
-    <div
-      className="snake-scoreboard"
-      style={{
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        padding: '12px 20px',
-        backgroundColor: '#1e293b',
-        borderRadius: '12px',
-        marginBottom: '16px',
-        border: '1px solid #334155',
-      }}
-    >
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ color: '#94a3b8', fontSize: '12px', textTransform: 'uppercase' }}>
-          Punkte
-        </div>
-        <div
-          style={{
-            color: '#22c55e',
-            fontSize: '24px',
-            fontWeight: 'bold',
-            fontFamily: 'monospace',
-          }}
-        >
-          {score}
-        </div>
+    <div className="flex justify-around items-center px-4 py-3 bg-slate-800/50 rounded-xl mb-4 border border-slate-700/50">
+      <div className="text-center">
+        <div className="text-slate-400 text-xs uppercase tracking-wide">Punkte</div>
+        <div className="text-green-500 text-xl sm:text-2xl font-bold font-mono">{score}</div>
       </div>
 
-      <div
-        style={{
-          width: '1px',
-          height: '40px',
-          backgroundColor: '#334155',
-        }}
-      />
+      <div className="w-px h-10 bg-slate-700" />
 
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ color: '#94a3b8', fontSize: '12px', textTransform: 'uppercase' }}>
-          Highscore
-        </div>
-        <div
-          style={{
-            color: '#f59e0b',
-            fontSize: '24px',
-            fontWeight: 'bold',
-            fontFamily: 'monospace',
-          }}
-        >
-          {highScore}
-        </div>
+      <div className="text-center">
+        <div className="text-slate-400 text-xs uppercase tracking-wide">Highscore</div>
+        <div className="text-amber-500 text-xl sm:text-2xl font-bold font-mono">{highScore}</div>
       </div>
 
       {isGameOver && (
         <>
-          <div
-            style={{
-              width: '1px',
-              height: '40px',
-              backgroundColor: '#334155',
-            }}
-          />
-          <div
-            style={{
-              color: '#ef4444',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              textAlign: 'center',
-            }}
-          >
+          <div className="w-px h-10 bg-slate-700" />
+          <div className="text-red-500 text-sm sm:text-base font-bold text-center">
             GAME OVER
           </div>
         </>

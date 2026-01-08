@@ -20,37 +20,15 @@ export default function Snake() {
   } = useSnakeGame()
 
   return (
-    <div
-      className="card snake-game"
-      style={{
-        backgroundColor: '#0f172a',
-        borderRadius: '16px',
-        padding: '24px',
-        maxWidth: '450px',
-        margin: '0 auto',
-        border: '1px solid #334155',
-      }}
-    >
-      <h2
-        style={{
-          color: '#f8fafc',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          marginBottom: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-        }}
-      >
+    <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 sm:p-6 w-full max-w-md mx-auto">
+      <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 flex items-center justify-center gap-2 text-white">
         <span role="img" aria-label="Schlange">🐍</span>
         Snake
       </h2>
 
       <ScoreBoard score={score} highScore={highScore} isGameOver={isGameOver} />
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+      <div className="flex justify-center mb-4">
         <GameBoard snake={snake} food={food} gridSize={gridSize} />
       </div>
 

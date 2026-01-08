@@ -20,6 +20,7 @@ describe('GameSelector', () => {
   it('displays game descriptions', () => {
     render(<GameSelector selectedGame="snake" onSelectGame={() => {}} />)
 
+    // Descriptions exist in DOM (even if visually hidden on mobile)
     expect(screen.getByText('Klassisches Snake-Spiel')).toBeInTheDocument()
     expect(screen.getByText('Zahlen-Puzzle Klassiker')).toBeInTheDocument()
   })
@@ -38,11 +39,12 @@ describe('GameSelector', () => {
     )
 
     const snakeBtn = screen.getByTestId('game-btn-snake')
-    expect(snakeBtn).toHaveStyle({ borderColor: '#22c55e' })
+    // Check for Tailwind class instead of inline style
+    expect(snakeBtn.className).toContain('border-green-500')
 
     rerender(<GameSelector selectedGame="2048" onSelectGame={() => {}} />)
 
     const game2048Btn = screen.getByTestId('game-btn-2048')
-    expect(game2048Btn).toHaveStyle({ borderColor: '#eab308' })
+    expect(game2048Btn.className).toContain('border-amber-500')
   })
 })

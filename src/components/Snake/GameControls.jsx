@@ -1,4 +1,5 @@
 import React from 'react'
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Play, Pause, RotateCcw } from 'lucide-react'
 
 export default function GameControls({
   isPlaying,
@@ -12,41 +13,21 @@ export default function GameControls({
   const showResetButton = isGameOver || (!isPlaying && score > 0)
 
   return (
-    <div className="snake-controls">
+    <div>
       {/* Desktop/Keyboard Instructions */}
-      <p className="snake-instructions" style={{
-        color: '#94a3b8',
-        fontSize: '14px',
-        marginBottom: '12px',
-        textAlign: 'center',
-      }}>
+      <p className="text-slate-400 text-xs sm:text-sm text-center mb-3">
         Steuerung: Pfeiltasten oder WASD
       </p>
 
       {/* Action Buttons */}
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        justifyContent: 'center',
-        marginBottom: '16px',
-      }}>
+      <div className="flex gap-2 justify-center mb-4">
         {!isPlaying && !isGameOver && (
           <button
             onClick={onStart}
-            className="snake-btn snake-btn-primary"
-            style={{
-              padding: '10px 24px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
+            className="px-5 py-2.5 min-h-[44px] bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
             aria-label="Spiel starten"
           >
+            <Play className="w-4 h-4" />
             Start
           </button>
         )}
@@ -54,20 +35,10 @@ export default function GameControls({
         {isPlaying && (
           <button
             onClick={onPause}
-            className="snake-btn snake-btn-secondary"
-            style={{
-              padding: '10px 24px',
-              backgroundColor: '#475569',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
+            className="px-5 py-2.5 min-h-[44px] bg-slate-600 hover:bg-slate-500 active:bg-slate-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
             aria-label="Spiel pausieren"
           >
+            <Pause className="w-4 h-4" />
             Pause
           </button>
         )}
@@ -75,20 +46,10 @@ export default function GameControls({
         {showResetButton && (
           <button
             onClick={onReset}
-            className="snake-btn snake-btn-primary"
-            style={{
-              padding: '10px 24px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
+            className="px-5 py-2.5 min-h-[44px] bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
             aria-label="Neues Spiel starten"
           >
+            <RotateCcw className="w-4 h-4" />
             Neu starten
           </button>
         )}
@@ -96,91 +57,49 @@ export default function GameControls({
 
       {/* Mobile Touch Controls */}
       <div
-        className="snake-touch-controls"
+        className="grid justify-center"
         style={{
-          display: 'grid',
           gridTemplateAreas: `
             ". up ."
             "left . right"
             ". down ."
           `,
-          gridTemplateColumns: 'repeat(3, 50px)',
-          gridTemplateRows: 'repeat(3, 50px)',
-          gap: '4px',
-          justifyContent: 'center',
+          gridTemplateColumns: 'repeat(3, 52px)',
+          gridTemplateRows: 'repeat(3, 52px)',
+          gap: '6px',
         }}
       >
         <button
           onClick={() => onDirectionChange({ x: 0, y: -1 })}
-          style={{
-            gridArea: 'up',
-            backgroundColor: '#334155',
-            border: '1px solid #475569',
-            borderRadius: '8px',
-            color: 'white',
-            fontSize: '20px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          className="min-w-[44px] min-h-[44px] bg-slate-700/50 hover:bg-slate-600/50 active:bg-slate-700 border border-slate-600 rounded-xl text-white flex items-center justify-center transition-all"
+          style={{ gridArea: 'up' }}
           aria-label="Nach oben"
         >
-          ^
+          <ArrowUp className="w-5 h-5" />
         </button>
         <button
           onClick={() => onDirectionChange({ x: -1, y: 0 })}
-          style={{
-            gridArea: 'left',
-            backgroundColor: '#334155',
-            border: '1px solid #475569',
-            borderRadius: '8px',
-            color: 'white',
-            fontSize: '20px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          className="min-w-[44px] min-h-[44px] bg-slate-700/50 hover:bg-slate-600/50 active:bg-slate-700 border border-slate-600 rounded-xl text-white flex items-center justify-center transition-all"
+          style={{ gridArea: 'left' }}
           aria-label="Nach links"
         >
-          &lt;
+          <ArrowLeft className="w-5 h-5" />
         </button>
         <button
           onClick={() => onDirectionChange({ x: 1, y: 0 })}
-          style={{
-            gridArea: 'right',
-            backgroundColor: '#334155',
-            border: '1px solid #475569',
-            borderRadius: '8px',
-            color: 'white',
-            fontSize: '20px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          className="min-w-[44px] min-h-[44px] bg-slate-700/50 hover:bg-slate-600/50 active:bg-slate-700 border border-slate-600 rounded-xl text-white flex items-center justify-center transition-all"
+          style={{ gridArea: 'right' }}
           aria-label="Nach rechts"
         >
-          &gt;
+          <ArrowRight className="w-5 h-5" />
         </button>
         <button
           onClick={() => onDirectionChange({ x: 0, y: 1 })}
-          style={{
-            gridArea: 'down',
-            backgroundColor: '#334155',
-            border: '1px solid #475569',
-            borderRadius: '8px',
-            color: 'white',
-            fontSize: '20px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          className="min-w-[44px] min-h-[44px] bg-slate-700/50 hover:bg-slate-600/50 active:bg-slate-700 border border-slate-600 rounded-xl text-white flex items-center justify-center transition-all"
+          style={{ gridArea: 'down' }}
           aria-label="Nach unten"
         >
-          v
+          <ArrowDown className="w-5 h-5" />
         </button>
       </div>
     </div>

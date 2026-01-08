@@ -32,13 +32,13 @@ describe('Memory', () => {
   it('flips a card when clicked', async () => {
     render(<Memory onBack={() => {}} />)
 
-    // Find all card containers and click the first one
-    const cardContainers = document.querySelectorAll('.card-container')
+    // Find all card containers (aspect-square divs) and click the first one
+    const cardContainers = document.querySelectorAll('.aspect-square')
     fireEvent.click(cardContainers[0])
 
     // After click, the card should be flipped (transform changes)
     await waitFor(() => {
-      const cardInner = cardContainers[0].querySelector('.card-inner')
+      const cardInner = cardContainers[0].querySelector('div')
       expect(cardInner.style.transform).toBe('rotateY(180deg)')
     })
   })
@@ -46,7 +46,7 @@ describe('Memory', () => {
   it('increments move counter after flipping two cards', async () => {
     render(<Memory onBack={() => {}} />)
 
-    const cardContainers = document.querySelectorAll('.card-container')
+    const cardContainers = document.querySelectorAll('.aspect-square')
 
     // Click two cards
     fireEvent.click(cardContainers[0])
@@ -61,7 +61,7 @@ describe('Memory', () => {
   it('resets the game when reset button is clicked', async () => {
     render(<Memory onBack={() => {}} />)
 
-    const cardContainers = document.querySelectorAll('.card-container')
+    const cardContainers = document.querySelectorAll('.aspect-square')
 
     // Make some moves
     fireEvent.click(cardContainers[0])

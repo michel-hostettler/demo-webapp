@@ -18,31 +18,9 @@ export default function Game2048() {
   } = useGame2048()
 
   return (
-    <div
-      className="card game-2048"
-      style={{
-        backgroundColor: '#0f172a',
-        borderRadius: '16px',
-        padding: '24px',
-        maxWidth: '350px',
-        margin: '0 auto',
-        border: '1px solid #334155',
-      }}
-    >
-      <h2
-        style={{
-          color: '#f8fafc',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          marginBottom: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-        }}
-      >
-        <span style={{ color: '#eab308' }}>2048</span>
+    <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 sm:p-6 w-full max-w-sm mx-auto">
+      <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 flex items-center justify-center gap-2">
+        <span className="text-amber-400">2048</span>
       </h2>
 
       <ScoreDisplay
@@ -53,7 +31,7 @@ export default function Game2048() {
         hasWon={hasWonGame}
       />
 
-      <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
+      <div className="flex justify-center relative">
         <Grid tiles={tiles} />
         <GameOverlay
           isGameOver={isGameOver}

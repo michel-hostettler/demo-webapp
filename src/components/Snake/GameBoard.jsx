@@ -1,24 +1,15 @@
 import React from 'react'
 
 export default function GameBoard({ snake, food, gridSize }) {
-  const cellSize = 100 / gridSize
-
   return (
     <div
-      className="snake-board"
+      className="grid bg-slate-800 rounded-xl p-1 border-2 border-slate-700 w-full aspect-square"
       role="img"
       aria-label="Snake Spielfeld"
       style={{
-        display: 'grid',
         gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
         gap: '1px',
-        aspectRatio: '1',
-        width: '100%',
-        maxWidth: '400px',
-        backgroundColor: '#1e293b',
-        borderRadius: '12px',
-        padding: '4px',
-        border: '2px solid #334155',
+        maxWidth: 'min(100%, 350px)',
       }}
     >
       {Array.from({ length: gridSize * gridSize }).map((_, index) => {
@@ -29,33 +20,26 @@ export default function GameBoard({ snake, food, gridSize }) {
         const isSnakeBody = snake.slice(1).some((seg) => seg.x === x && seg.y === y)
         const isFood = food.x === x && food.y === y
 
-        let cellClass = 'snake-cell'
-        let cellStyle = {
-          backgroundColor: '#0f172a',
-          borderRadius: '2px',
-          transition: 'background-color 0.1s',
-        }
+        let className = 'transition-colors duration-100 '
+        let style = {}
 
         if (isSnakeHead) {
-          cellClass += ' snake-head'
-          cellStyle.backgroundColor = '#22c55e'
-          cellStyle.boxShadow = '0 0 8px #22c55e'
-          cellStyle.borderRadius = '4px'
+          className += 'bg-green-500 rounded'
+          style.boxShadow = '0 0 8px #22c55e'
         } else if (isSnakeBody) {
-          cellClass += ' snake-body'
-          cellStyle.backgroundColor = '#4ade80'
+          className += 'bg-green-400 rounded-sm'
         } else if (isFood) {
-          cellClass += ' snake-food'
-          cellStyle.backgroundColor = '#ef4444'
-          cellStyle.boxShadow = '0 0 8px #ef4444'
-          cellStyle.borderRadius = '50%'
+          className += 'bg-red-500 rounded-full'
+          style.boxShadow = '0 0 8px #ef4444'
+        } else {
+          className += 'bg-slate-900 rounded-sm'
         }
 
         return (
           <div
             key={index}
-            className={cellClass}
-            style={cellStyle}
+            className={className}
+            style={style}
             aria-label={
               isSnakeHead ? 'Schlangenkopf' :
               isSnakeBody ? 'Schlangenkörper' :
